@@ -8,7 +8,7 @@ import signal
 import sys
 import time
 
-env = Environment(loader=PackageLoader('haproxy', 'templates'))
+env = Environment(loader=PackageLoader('bind', 'templates'))
 POLL_TIMEOUT=5
 
 signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -70,20 +70,19 @@ def get_services():
         endpoints["backends"].append(dict(name=name_server, addr=addr))
         port='80'
         if "HOST_SERVE_PORT" in os.environ:
-            print 'entro'
             port=os.environ["HOST_SERVE_PORT"]
         endpoints["port"] = port
     return services
 
 def generate_config(services,templatefile):
     template = env.get_template(templatefile)
-    with open("/etc/haproxy.cfg", "w") as f:
+    with open("/data/bind/lib/"+list(services)[0]+".cfg", "w") as f:
         f.write(template.render(services=services))
 
 if __name__ == "__main__":
 
     # get template from arguments if set
-    template='haproxy.cfg.tmpl';
+    template='bind.cfg.tmpl';
     if len(sys.argv)>1:
         template=sys.argv[1]
 
@@ -96,11 +95,14 @@ if __name__ == "__main__":
                 time.sleep(POLL_TIMEOUT)
                 continue
 
+            ### docker run -v /var/run/docker.sock:/run/docker.sock -v $(which docker):/bin/docker [your image]
+            
+            
             print "config changed. reload haproxy"
             generate_config(services,template)
-            ret = call(["./reload-haproxy.sh"])
+            ret = call(["./reload-bind.sh"])
             if ret != 0:
-                print "reloading haproxy returned: ", ret
+                print "reloading bind returned: ", ret
                 time.sleep(POLL_TIMEOUT)
                 continue
             current_services = services

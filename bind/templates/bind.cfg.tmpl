@@ -1,0 +1,15 @@
+{% for service in services %}
+$ttl 38400
+test.ozzy-boshi.com.	IN	SOA	{{ services[service].name }}. {{ services[service].email }}. (
+
+			1453490953
+			10800
+			3600
+			604800
+			38400 )
+
+
+{{ service }}.	1	IN	NS	{{ services[service].name }}
+    {% for backend in services[service].backends %}
+{{ service }}. 1 IN A {{ backend.addr }}{% endfor %}
+{% endfor %}}

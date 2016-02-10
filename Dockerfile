@@ -11,5 +11,5 @@ ADD . /app
 
 WORKDIR /app
 
-CMD ["python", "main.py", "haproxy_web.cfg.tmpl"]
+CMD ["python", "main.py", "bind.cfg.tmpl"]
 
