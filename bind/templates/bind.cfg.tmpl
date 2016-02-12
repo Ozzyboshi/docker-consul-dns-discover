@@ -12,4 +12,4 @@ test.ozzy-boshi.com.	IN	SOA	{{ services[service].name }}. {{ services[service].e
 {{ service }}.	1	IN	NS	{{ services[service].name }}
     {% for backend in services[service].backends %}
 {{ service }}. 1 IN A {{ backend.addr }}{% endfor %}
-{% endfor %}}
+{% endfor %}
