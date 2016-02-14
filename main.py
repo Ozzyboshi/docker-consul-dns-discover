@@ -8,6 +8,7 @@ import signal
 import sys
 import time
 
+SERIAL_FILE="serial.txt"
 env = Environment(loader=PackageLoader('bind', 'templates'))
 POLL_TIMEOUT=5
 
@@ -75,9 +76,35 @@ def get_services():
     return services
 
 def generate_config(services,templatefile):
+	
+    sn=generate_serialnumber()
+	
     template = env.get_template(templatefile)
     with open("/data/bind/lib/"+list(services)[0]+".cfg", "w") as f:
-        f.write(template.render(services=services))
+        f.write(template.render(services=services,sn=sn))
+
+def generate_serialnumber():
+	
+	serialnumber=''
+	
+	try:
+		fo = open(SERIAL_FILE, "r")
+		serialnumber=fo.read(10)
+	except IOError: 
+		serialnumber=''
+
+	current_date = time.strftime("%Y%m%d")
+	counter=0
+	
+	if serialnumber[:8]==current_date :
+		counter = int(''.join(str(serialnumber[8])).join(str(serialnumber[9])))+1
+				
+	sn=current_date+str(counter).zfill(2)
+	fo = open(SERIAL_FILE, "w+")
+	fo.write(sn)
+	fo.close()
+	
+	return sn
 
 if __name__ == "__main__":
 
@@ -93,12 +120,9 @@ if __name__ == "__main__":
 
             if not services or services == current_services:
                 time.sleep(POLL_TIMEOUT)
-                continue
-
-            ### docker run -v /var/run/docker.sock:/run/docker.sock -v $(which docker):/bin/docker [your image]
+                continue            
             
-            
-            print "config changed. reload haproxy"
+            print "config changed. reload bind"
             generate_config(services,template)
             ret = call(["./reload-bind.sh"])
             if ret != 0:
