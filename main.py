@@ -97,7 +97,7 @@ def generate_serialnumber():
 	counter=0
 	
 	if serialnumber[:8]==current_date :
-		counter = int(''.join(str(serialnumber[8])).join(str(serialnumber[9])))+1
+		counter = int("%c%c" % (serialnumber[8] , serialnumber[9]))+1
 				
 	sn=current_date+str(counter).zfill(2)
 	fo = open(SERIAL_FILE, "w+")
